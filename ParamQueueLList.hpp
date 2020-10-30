@@ -73,7 +73,7 @@ public:
   ParamQueue<Item>& operator=(ParamQueue<Item> const& other)
   {
     auto otherf = other.front.get();
-    _size        = 0;
+    _size       = 0;
     front.reset();
     back = nullptr;
     while (otherf)
@@ -86,7 +86,7 @@ public:
   ParamQueue<Item>& operator=(ParamQueue<Item>&& other)
   {
     _size = other._size;
-    back = other.back;
+    back  = other.back;
     front.reset(other.front.release());
     return *this;
   }
@@ -129,12 +129,8 @@ public:
     else
       return QueueState::part;
   }
-  size_t size() {
-    return _size;
-  }
-  size_t capacity() {
-    return _size;
-  }
+  size_t size() { return _size; }
+  size_t capacity() { return _size; }
 };
 std::ostream& operator<<(std::ostream& stream, QueueState state)
 {

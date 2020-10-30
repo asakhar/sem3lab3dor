@@ -114,7 +114,7 @@ void copy_queue(QueueMap& qs, std::string& sel)
   std::getline(std::cin, name);
   std::cout << "Input new queue name: ";
   std::string namenew;
-  //std::cin.get();
+  // std::cin.get();
   std::getline(std::cin, namenew);
   sel     = namenew;
   qs[sel] = Queue(qs[name]);
@@ -164,8 +164,7 @@ int main()
                  ">>";
     int choice;
     std::cin >> choice;
-    if (choice > sizeof(options)/8-1
-        || choice < 0)
+    if (choice > sizeof(options) / 8 - 1 || choice < 0)
     {
       std::cout << "Try again!\n";
       continue;
