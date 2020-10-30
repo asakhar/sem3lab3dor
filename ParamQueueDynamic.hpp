@@ -143,7 +143,7 @@ public:
   Item& operator+=(Item const& elem)
   {
     if ((back >= _vector_size) != (front >= _vector_size) && back % _vector_size == front % _vector_size)
-      // throw std::runtime_error("Queue overflow"); /*resize vector*/
+      // throw std::runtime_error("Queue overflow"); /*resize vector instead*/
       resize(2);
     head[(back++) % _vector_size] = elem;
     back %= 2 * _vector_size;
