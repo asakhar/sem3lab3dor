@@ -148,7 +148,7 @@ enum QueueState
  * @tparam Item Queue element type
  */
 template <typename Item>
-struct ParamQueue
+class ParamQueue
 {
 private:
   std::unique_ptr<Item[]> head;
@@ -284,7 +284,7 @@ public:
       resize(2);
     head[(back++) % _vector_size] = elem;
     back %= 2 * _vector_size;
-    return head[(back - 1) % _vector_size];
+    return head[(back + _vector_size - 1) % _vector_size];
   }
   /**
    * @brief State cheking

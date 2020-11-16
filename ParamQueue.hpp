@@ -152,7 +152,7 @@ public:
       throw std::runtime_error("Queue overflow");
     std::memcpy(reinterpret_cast<Item*>(queue + (back++) % __n), reinterpret_cast<Item*>(&elem), sizeof(Item));
     back %= 2 * __n;
-    return queue[(back - 1) % __n];
+    return queue[(back + __n - 1) % __n];
   }
   /**
    * @brief Empty, partially full & full state checking
