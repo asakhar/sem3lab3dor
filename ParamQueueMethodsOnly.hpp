@@ -33,20 +33,14 @@ struct QueueElem
    * @param stream e.g. std::cin
    * @return std::istream&
    */
-  std::istream& input(std::istream& stream = std::cin)
-  {
-    return (stream >> num).get(*str).get(str, __n);
-  }
+  std::istream& input(std::istream& stream = std::cin) { return (stream >> num).get(*str).get(str, __n); }
   /**
    * @brief Output to stream
    *
    * @param stream e.g. std::cout
    * @return std::ostream&
    */
-  std::ostream& output(std::ostream& stream = std::cin)
-  {
-    return stream << "(" << num << ", " << str << ")";
-  }
+  std::ostream& output(std::ostream& stream = std::cin) { return stream << "(" << num << ", " << str << ")"; }
 };
 
 /**
@@ -109,7 +103,7 @@ public:
     return stream;
   }
   /**
-   * @brief Output to stream 
+   * @brief Output to stream
    *
    * @param stream e.g. std::cout
    * @return std::ostream&
@@ -118,7 +112,7 @@ public:
   {
     for (size_t i = front; i != back; (++i) %= 2 * __n)
     {
-      queue[i%__n].output(stream);
+      queue[i % __n].output(stream);
     }
     return stream;
   }
