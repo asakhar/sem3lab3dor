@@ -9,7 +9,11 @@
 typedef QueueElem Param;
 typedef ParamQueue<Param> Queue;
 #else
+#ifdef NOOPERATOR
+#include "ParamQueueMethodsOnly.hpp"
+#else
 #include "ParamQueue.hpp"
+#endif
 typedef QueueElem<6> Param;
 typedef ParamQueue<Param, 3> Queue;
 #endif
@@ -30,7 +34,11 @@ void new_queue(QueueMap& qs, std::string& sel)
   {
     std::cout << "Input param (format: <number> <string>): ";
     params.push_back({});
+#ifdef NOOPERATOR
+    params.back().input();
+#else
     std::cin >> params.back();
+#endif
     std::cout << "Do you want to continue?(0_/1) > ";
     std::cin >> ch;
   }
@@ -49,7 +57,14 @@ void remove_queue(QueueMap& qs, std::string& sel)
   std::cout << "Successfully removed!";
 }
 
-void print_queue(QueueMap& qs, std::string& sel) { std::cout << "Selected queue: \n" << qs[sel]; }
+void print_queue(QueueMap& qs, std::string& sel)
+{
+#ifdef NOOPERATOR
+  qs[sel].output(std::cout << "Selected queue: \n");
+#else
+  std::cout << "Selected queue: \n" << qs[sel];
+#endif
+}
 
 void list_queues(QueueMap& qs, std::string& sel)
 {
@@ -81,7 +96,11 @@ void add_params(QueueMap& qs, std::string& sel)
   while (ch == '1')
   {
     std::cout << "Input param (format: <number> <string>): ";
+#ifdef NOOPERATOR
+    qs[sel].input();
+#else
     std::cin >> qs[sel];
+#endif
     std::cout << "Do you want to continue?(0_/1) > ";
     std::cin >> ch;
   }
@@ -93,8 +112,13 @@ void pop_params(QueueMap& qs, std::string& sel)
   while (ch == '1')
   {
     Param a;
+#ifdef NOOPERATOR
+    qs[sel].pop(a);
+    a.output(std::cout << "Popped: ") << "\nDo you want to continue?(0_/1) > ";
+#else
     qs[sel](a);
     std::cout << "Popped: " << a << "\nDo you want to continue?(0_/1) > ";
+#endif
     std::cin >> ch;
   }
 }

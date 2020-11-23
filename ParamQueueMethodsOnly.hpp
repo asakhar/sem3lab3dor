@@ -100,7 +100,7 @@ public:
    * @param stream e.g. std::cin
    * @return std::istream&
    */
-  std::istream& input(std::istream& stream)
+  std::istream& input(std::istream& stream = std::cin)
   {
     if ((back >= __n) != (front >= __n) && back % __n == front % __n)
       throw std::runtime_error("Queue overflow");
@@ -114,7 +114,7 @@ public:
    * @param stream e.g. std::cout
    * @return std::ostream&
    */
-  std::ostream& output(std::ostream& stream)
+  std::ostream& output(std::ostream& stream = std::cout)
   {
     for (size_t i = front; i != back; (++i) %= 2 * __n)
     {
