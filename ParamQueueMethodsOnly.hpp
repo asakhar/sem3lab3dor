@@ -104,7 +104,7 @@ public:
   {
     if ((back >= __n) != (front >= __n) && back % __n == front % __n)
       throw std::runtime_error("Queue overflow");
-    stream >> queue[(back++) % __n];
+    queue[(back++) % __n].input(stream);
     back %= 2 * __n;
     return stream;
   }
@@ -118,7 +118,7 @@ public:
   {
     for (size_t i = front; i != back; (++i) %= 2 * __n)
     {
-      stream << queue[i % __n];
+      queue[i%__n].output(stream);
     }
     return stream;
   }
