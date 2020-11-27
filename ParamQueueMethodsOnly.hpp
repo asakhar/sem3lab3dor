@@ -8,11 +8,10 @@
 /**
  * @brief Queue element
  *
- * @tparam __n String length
  */
-template <const size_t __n>
 struct QueueElem
 {
+  static constexpr size_t __n = 20;
   int num;
   char str[__n];
   /**
@@ -21,11 +20,14 @@ struct QueueElem
    * @param _num Number data
    * @param _str String data of length __n
    */
-  QueueElem(int const& _num = 0, char const _str[__n] = nullptr) : num(_num)
+  QueueElem(int const& _num = 0, char const _str[__n] = "") : num(_num)
   {
-    std::memset(reinterpret_cast<char*>(str), 0, sizeof(str));
-    if (_str)
-      std::memcpy(reinterpret_cast<char*>(str), reinterpret_cast<const char*>(_str), std::min(std::strlen(_str), sizeof(str)));
+    size_t strl = std::strlen(_str);
+    for (size_t i = 0; i < __n; i++)
+      if (i < strl)
+        str[i] = _str[i];
+      else
+        str[i] = '\0';
   }
   /**
    * @brief Input from stream
@@ -40,7 +42,7 @@ struct QueueElem
    * @param stream e.g. std::cout
    * @return std::ostream&
    */
-  std::ostream& output(std::ostream& stream = std::cin) { return stream << "(" << num << ", " << str << ")"; }
+  std::ostream& output(std::ostream& stream = std::cout) { return stream << "(" << num << ", " << str << ")"; }
 };
 
 /**
@@ -67,15 +69,14 @@ enum QueueState
 /**
  * @brief Parameter Queue
  *
- * @tparam Item Queue element type
- * @tparam __n Size of vector
  */
-template <typename Item, const size_t __n>
 struct ParamQueue
 {
+  static constexpr size_t __n = 20;
+
 private:
   size_t front, back;
-  Item queue[__n];
+  QueueElem queue[__n];
 
 public:
   /**
@@ -83,10 +84,10 @@ public:
    *
    * @param _q elements
    */
-  ParamQueue(std::vector<Item> _q = {}) : front(0), back(std::min(__n, _q.size()))
+  ParamQueue(std::vector<QueueElem> _q = {}) : front(0), back(0)
   {
-    if (!_q.empty())
-      std::memcpy(queue, _q.data(), std::min(sizeof(queue), sizeof(Item) * _q.size()));
+    for (size_t i = 0; i < _q.size(); i++)
+      push(_q[i]);
   }
   /**
    * @brief Input one element from stream
@@ -120,13 +121,13 @@ public:
    * @brief Take first element from queue
    *
    * @param elem Reference to an object to fill
-   * @return ParamQueue<Item, __n>&
+   * @return ParamQueue<QueueElem, __n>&
    */
-  ParamQueue<Item, __n>& pop(Item& elem)
+  ParamQueue& pop(QueueElem& elem)
   {
     if ((back >= __n) == (front >= __n) && back % __n == front % __n)
       throw std::runtime_error("Queue is empty");
-    std::memcpy(reinterpret_cast<Item*>(&elem), reinterpret_cast<Item*>(queue + (front++) % __n), sizeof(Item));
+    elem = *(queue + (front++) % __n);
     front %= 2 * __n;
     return *this;
   }
@@ -134,13 +135,13 @@ public:
    * @brief Add to queue
    *
    * @param elem Element to be added
-   * @return Item&
+   * @return QueueElem&
    */
-  Item& push(Item const& elem)
+  QueueElem& push(QueueElem const& elem)
   {
     if ((back >= __n) != (front >= __n) && back % __n == front % __n)
       throw std::runtime_error("Queue overflow");
-    std::memcpy(reinterpret_cast<Item*>(queue + (back++) % __n), reinterpret_cast<Item*>(&elem), sizeof(Item));
+    *(queue + (back++) % __n) = elem;
     back %= 2 * __n;
     return queue[(back + __n - 1) % __n];
   }

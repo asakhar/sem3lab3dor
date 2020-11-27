@@ -25,7 +25,9 @@ public:
    */
   QueueElem(int const& _num = 0, std::string const& _str = "") : num(_num), str(new char[_str.size() + 1])
   {
-    std::memcpy(str.get(), _str.c_str(), _str.size() + 1);
+    for (size_t i = 0; i < _str.size(); i++)
+      str[i] = _str[i];
+    str[_str.size()] = '\0';
   }
   /**
    * @brief Copy-construct a new Queue Elem object
@@ -34,7 +36,8 @@ public:
    */
   QueueElem(QueueElem const& other) : num{other.num}, str(new char[std::strlen(other.str.get()) + 1])
   {
-    std::memcpy(str.get(), other.str.get(), std::strlen(other.str.get()) + 1);
+    for (size_t i = 0; i < std::strlen(other.str.get()) + 1; i++)
+      str[i] = other.str[i];
   }
   /**
    * @brief Move-construct a new Queue Elem object
@@ -62,9 +65,11 @@ public:
    */
   QueueElem& operator=(QueueElem const& other)
   {
-    num = other.num;
-    str.reset(new char[std::strlen(other.str.get()) + 1]);
-    std::memcpy(str.get(), other.str.get(), std::strlen(other.str.get()) + 1);
+    num      = other.num;
+    auto len = std::strlen(other.str.get()) + 1;
+    str.reset(new char[len]);
+    for (size_t i = 0; i < len; i++)
+      str[i] = other.str[i];
     return *this;
   }
   /**
@@ -82,8 +87,9 @@ public:
     std::getline(stream, tmp);
 
     elem.str.reset(new char[tmp.size() + 1]);
-    std::memcpy(elem.str.get(), tmp.c_str(), tmp.size() + 1);
-
+    for (size_t i = 0; i < tmp.size(); i++)
+      elem.str[i] = tmp[i];
+    elem.str[tmp.size()] = '\0';
     return stream;
   }
   /**
@@ -105,8 +111,10 @@ public:
    */
   char const* set_str(char const* value = "")
   {
-    str.reset(new char[std::strlen(value) + 1]);
-    std::memcpy(str.get(), value, std::strlen(value) + 1);
+    auto len = std::strlen(value) + 1;
+    str.reset(new char[len]);
+    for(size_t i = 0; i < len; i++)
+      str[i] = value[i];
     return str.get();
   }
   /**
@@ -145,13 +153,11 @@ enum QueueState
 /**
  * @brief Queue class
  *
- * @tparam Item Queue element type
  */
-template <typename Item>
 class ParamQueue
 {
 private:
-  std::unique_ptr<Item[]> head;
+  std::unique_ptr<QueueElem[]> head;
   size_t front, back;
 
   size_t _vector_size;
@@ -162,9 +168,9 @@ public:
    *
    * @param _q vector of elements
    */
-  ParamQueue(std::vector<Item> const& _q = {}) : _vector_size(_q.capacity()), back(_q.size()), front(0)
+  ParamQueue(std::vector<QueueElem> const& _q = {}) : _vector_size(_q.capacity()), back(_q.size()), front(0)
   {
-    head.reset(new Item[_q.capacity()]);
+    head.reset(new QueueElem[_q.capacity()]);
     for (size_t i = 0; i < _q.size(); i++)
       head[i] = _q[i];
   }
@@ -174,9 +180,9 @@ public:
    * @param other Object to copy from
    * @param multiplier Size multiplication
    */
-  ParamQueue(ParamQueue<Item> const& other, size_t multiplier = 1) : back(0), front(0), _vector_size(other._vector_size)
+  ParamQueue(ParamQueue const& other, size_t multiplier = 1) : back(0), front(0), _vector_size(other._vector_size)
   {
-    head.reset(new Item[other._vector_size * multiplier]);
+    head.reset(new QueueElem[other._vector_size * multiplier]);
     for (size_t i = other.front; i != other.back; (++i) %= 2 * _vector_size, back++)
     {
       head[back] = other.head[i % _vector_size];
@@ -188,7 +194,7 @@ public:
    *
    * @param other rvalue reference to move from
    */
-  ParamQueue(ParamQueue<Item>&& other)
+  ParamQueue(ParamQueue&& other)
       : _vector_size(other._vector_size), back(other.back), front(other.front), head(other.head.release())
   {
   }
@@ -197,19 +203,19 @@ public:
    *
    * @param mul
    */
-  inline void resize(size_t mul) { *this = std::move(ParamQueue<Item>(*this, mul)); }
+  inline void resize(size_t mul) { *this = std::move(ParamQueue(*this, mul)); }
   /**
    * @brief Copy-assignment operator
    *
    * @param other Object to copy from
-   * @return ParamQueue<Item>&
+   * @return ParamQueue<QueueElem>&
    */
-  ParamQueue<Item>& operator=(ParamQueue<Item> const& other)
+  ParamQueue& operator=(ParamQueue const& other)
   {
     back         = 0;
     front        = 0;
     _vector_size = other._vector_size;
-    head.reset(new Item[_vector_size]);
+    head.reset(new QueueElem[_vector_size]);
     for (size_t i = other.front; i != other.back; (++i) %= 2 * _vector_size, back++)
     {
       head[back] = other.head[i % _vector_size];
@@ -220,9 +226,9 @@ public:
    * @brief Move-assignment operator
    *
    * @param other Object to move from
-   * @return ParamQueue<Item>&
+   * @return ParamQueue<QueueElem>&
    */
-  ParamQueue<Item>& operator=(ParamQueue<Item>&& other)
+  ParamQueue& operator=(ParamQueue&& other)
   {
     front        = other.front;
     back         = other.back;
@@ -237,9 +243,9 @@ public:
    * @param q Object to fill
    * @return std::istream&
    */
-  friend std::istream& operator>>(std::istream& stream, ParamQueue<Item>& q)
+  friend std::istream& operator>>(std::istream& stream, ParamQueue& q)
   {
-    Item new_item;
+    QueueElem new_item;
     stream >> new_item;
     q += new_item;
     return stream;
@@ -251,7 +257,7 @@ public:
    * @param q Queue to print to stream
    * @return std::ostream&
    */
-  friend std::ostream& operator<<(std::ostream& stream, ParamQueue<Item>& q)
+  friend std::ostream& operator<<(std::ostream& stream, ParamQueue& q)
   {
     for (size_t i = q.front; i != q.back; (++i) %= 2 * q.capacity())
       stream << q.head[i % q.capacity()];
@@ -261,9 +267,9 @@ public:
    * @brief Take the first element from queue
    *
    * @param elem Object to fill reference
-   * @return ParamQueue<Item>&
+   * @return ParamQueue&
    */
-  ParamQueue<Item>& operator()(Item& elem)
+  ParamQueue& operator()(QueueElem& elem)
   {
     if ((back >= _vector_size) == (front >= _vector_size) && back % _vector_size == front % _vector_size)
       throw std::runtime_error("Queue is empty");
@@ -275,9 +281,9 @@ public:
    * @brief Add element to queue
    *
    * @param elem
-   * @return Item&
+   * @return QueueElem&
    */
-  Item& operator+=(Item const& elem)
+  QueueElem& operator+=(QueueElem const& elem)
   {
     if ((back >= _vector_size) != (front >= _vector_size) && back % _vector_size == front % _vector_size)
       // throw std::runtime_error("Queue overflow"); /*resize vector instead*/

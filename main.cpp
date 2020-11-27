@@ -1,38 +1,30 @@
 #include <map>
 
 #ifdef DYNAMIC
-#ifdef LIST_VERSION
-#include "ParamQueueLList.hpp"
-#else
 #include "ParamQueueDynamic.hpp"
-#endif
-typedef QueueElem Param;
-typedef ParamQueue<Param> Queue;
 #else
 #ifdef NOOPERATOR
 #include "ParamQueueMethodsOnly.hpp"
 #else
 #include "ParamQueue.hpp"
 #endif
-typedef QueueElem<6> Param;
-typedef ParamQueue<Param, 3> Queue;
 #endif
-typedef std::map<std::string, Queue> QueueMap;
+typedef std::map<std::string, ParamQueue> QueueMap;
 
 void exit(QueueMap& qs, std::string& sel) { exit(0); }
 void new_queue(QueueMap& qs, std::string& sel)
 {
-  std::cout << "Input queue name: ";
+  std::cout << "Input ParamQueue name: ";
   std::string name;
   std::cin.get();
   std::getline(std::cin, name);
   std::cout << "Do you want to input params now?(0_/1) > ";
   char ch;
   std::cin >> ch;
-  std::vector<Param> params{};
+  std::vector<QueueElem> params{};
   while (ch == '1')
   {
-    std::cout << "Input param (format: <number> <string>): ";
+    std::cout << "Input QueueElem (format: <number> <string>): ";
     params.push_back({});
 #ifdef NOOPERATOR
     params.back().input();
@@ -42,14 +34,14 @@ void new_queue(QueueMap& qs, std::string& sel)
     std::cout << "Do you want to continue?(0_/1) > ";
     std::cin >> ch;
   }
-  qs[name] = Queue(params);
+  qs[name] = ParamQueue(params);
   sel      = name;
   std::cout << "Successfully created!";
 }
 
 void remove_queue(QueueMap& qs, std::string& sel)
 {
-  std::cout << "Input queue name: ";
+  std::cout << "Input ParamQueue name: ";
   std::string name;
   std::cin.get();
   std::getline(std::cin, name);
@@ -60,9 +52,9 @@ void remove_queue(QueueMap& qs, std::string& sel)
 void print_queue(QueueMap& qs, std::string& sel)
 {
 #ifdef NOOPERATOR
-  qs[sel].output(std::cout << "Selected queue: \n");
+  qs[sel].output(std::cout << "Selected ParamQueue: \n");
 #else
-  std::cout << "Selected queue: \n" << qs[sel];
+  std::cout << "Selected ParamQueue: \n" << qs[sel];
 #endif
 }
 
@@ -77,17 +69,17 @@ void list_queues(QueueMap& qs, std::string& sel)
 
 void select_queue(QueueMap& qs, std::string& sel)
 {
-  std::cout << "Input queue name: ";
+  std::cout << "Input ParamQueue name: ";
   std::string name;
   std::cin.get();
   std::getline(std::cin, name);
   if (qs.find(name) == qs.end())
   {
-    std::cout << "Queue not found!";
+    std::cout << "ParamQueue not found!";
     return;
   }
   sel = name;
-  std::cout << "Queue '" << sel << "' selected!";
+  std::cout << "ParamQueue '" << sel << "' selected!";
 }
 
 void add_params(QueueMap& qs, std::string& sel)
@@ -95,12 +87,20 @@ void add_params(QueueMap& qs, std::string& sel)
   char ch = '1';
   while (ch == '1')
   {
-    std::cout << "Input param (format: <number> <string>): ";
+    std::cout << "Input QueueElem (format: <number> <string>): ";
+    try
+    {
 #ifdef NOOPERATOR
-    qs[sel].input();
+      qs[sel].input();
 #else
-    std::cin >> qs[sel];
+      std::cin >> qs[sel];
 #endif
+    }
+    catch (std::runtime_error& e)
+    {
+      std::cout << e.what() << std::endl;
+      return;
+    }
     std::cout << "Do you want to continue?(0_/1) > ";
     std::cin >> ch;
   }
@@ -111,19 +111,27 @@ void pop_params(QueueMap& qs, std::string& sel)
   char ch = '1';
   while (ch == '1')
   {
-    Param a;
+    QueueElem a;
+    try
+    {
 #ifdef NOOPERATOR
-    qs[sel].pop(a);
-    a.output(std::cout << "Popped: ") << "\nDo you want to continue?(0_/1) > ";
+      qs[sel].pop(a);
+      a.output(std::cout << "Popped: ") << "\nDo you want to continue?(0_/1) > ";
 #else
-    qs[sel](a);
-    std::cout << "Popped: " << a << "\nDo you want to continue?(0_/1) > ";
+      qs[sel](a);
+      std::cout << "Popped: " << a << "\nDo you want to continue?(0_/1) > ";
 #endif
+    }
+    catch (std::runtime_error& e)
+    {
+      std::cout << e.what() << std::endl;
+      return;
+    }
     std::cin >> ch;
   }
 }
 
-void check_stat(QueueMap& qs, std::string& sel) { std::cout << "Queue status: " << qs[sel].check_state(); }
+void check_stat(QueueMap& qs, std::string& sel) { std::cout << "ParamQueue status: " << qs[sel].check_state(); }
 #ifdef DYNAMIC
 void check_size_capacity(QueueMap& qs, std::string& sel)
 {
@@ -132,16 +140,16 @@ void check_size_capacity(QueueMap& qs, std::string& sel)
 
 void copy_queue(QueueMap& qs, std::string& sel)
 {
-  std::cout << "Input copying queue name: ";
+  std::cout << "Input copying ParamQueue name: ";
   std::string name;
   std::cin.get();
   std::getline(std::cin, name);
-  std::cout << "Input new queue name: ";
+  std::cout << "Input new ParamQueue name: ";
   std::string namenew;
   // std::cin.get();
   std::getline(std::cin, namenew);
   sel     = namenew;
-  qs[sel] = Queue(qs[name]);
+  qs[sel] = ParamQueue(qs[name]);
   std::cout << "Copied successfully!";
 }
 #endif
@@ -165,24 +173,24 @@ int main()
 {
   QueueMap queues;
   std::string selected = "numbers";
-  queues["numbers"]    = Queue({{1, "one"}, {2, "two"}, {3, "three"}});
+  queues["numbers"]    = ParamQueue({{1, "one"}, {2, "two"}, {3, "three"}});
 
   while (1)
   {
     std::cout << "Ask... \n\
     [0]Exit\n\
-    [1]New queue\n\
-    [2]Remove queue\n\
+    [1]New ParamQueue\n\
+    [2]Remove ParamQueue\n\
     [3]List queues\n\
-    [4]Select queue\n\
-    [5]Print queue\n\
-    [6]Add to queue\n\
-    [7]Pop from queue\n\
-    [8]Check queue status\n"
+    [4]Select ParamQueue\n\
+    [5]Print ParamQueue\n\
+    [6]Add to ParamQueue\n\
+    [7]Pop from ParamQueue\n\
+    [8]Check ParamQueue status\n"
 #ifdef DYNAMIC
                  "\
     [9]Check size and capacity\n\
-    [10]Copy queue\n\
+    [10]Copy ParamQueue\n\
     "
 #endif
                  ">>";
@@ -202,60 +210,60 @@ int main()
   // // std::cout << a << std::endl;
   // // a.set_str("456mkdpoqkdkkf");
   // // std::cout << a << std::endl;
-  // auto queue = ParamQueue<QueueElem>({{123, "456"}, {543, "sdfv"}});
+  // auto ParamQueue = ParamQueue<QueueElem>({{123, "456"}, {543, "sdfv"}});
   // for (int i = 0; i < 13; i++)
   // {
-  //   std::cout << queue << "\ncapacity()=" << queue.capacity() << "\nsize()=" << queue.size() << std::endl;
+  //   std::cout << ParamQueue << "\ncapacity()=" << ParamQueue.capacity() << "\nsize()=" << ParamQueue.size() << std::endl;
   //   a.num = i;
   //   a.set_str(std::to_string(i+10).c_str());
-  //   queue += a;
-  //   //std::cin >> queue;
+  //   ParamQueue += a;
+  //   //std::cin >> ParamQueue;
   // }
-  // std::cout << queue << "\ncapacity()=" << queue.capacity() << "\nsize()=" << queue.size() << std::endl;
+  // std::cout << ParamQueue << "\ncapacity()=" << ParamQueue.capacity() << "\nsize()=" << ParamQueue.size() << std::endl;
   // for (int i = 0; i < 15; i++) {
-  //   queue(a);
+  //   ParamQueue(a);
   //   std::cout << a << std::endl;
   // }
   // for (int i = 13; i < 20; i++)
   // {
-  //   std::cout << queue << "\ncapacity()=" << queue.capacity() << "\nsize()=" << queue.size() << std::endl;
+  //   std::cout << ParamQueue << "\ncapacity()=" << ParamQueue.capacity() << "\nsize()=" << ParamQueue.size() << std::endl;
   //   a.num = i;
   //   a.set_str(std::to_string(i+10).c_str());
-  //   queue += a;
-  //   //std::cin >> queue;
+  //   ParamQueue += a;
+  //   //std::cin >> ParamQueue;
   // }
 
   // ---------------------------------------------------------------
 
-  // ParamQueue<QueueElem> queue;
-  // std::cin >> queue >> queue;
-  // std::cout << queue << std::endl;
+  // ParamQueue<QueueElem> ParamQueue;
+  // std::cin >> ParamQueue >> ParamQueue;
+  // std::cout << ParamQueue << std::endl;
   // QueueElem a;
-  // queue(a)(a);
+  // ParamQueue(a)(a);
   // std::cout << a << std::endl;
   // a.num = 12;
-  // queue += a;
+  // ParamQueue += a;
   // a.str = "abcdfffdf";
-  // queue += a;
-  // std::cout << queue << std::endl;
-  // queue(a)(a);
-  // std::cout << queue << std::endl;
+  // ParamQueue += a;
+  // std::cout << ParamQueue << std::endl;
+  // ParamQueue(a)(a);
+  // std::cout << ParamQueue << std::endl;
 
   //----------------------------------------------------
 
   // QueueElem<3> a;
   // sizeof(a);
-  // ParamQueue<QueueElem<3>, 4> queue;
-  // std::cin >> queue >> queue >> queue; // 3
-  // std::cout << queue.check_state();
+  // ParamQueue<QueueElem<3>, 4> ParamQueue;
+  // std::cin >> ParamQueue >> ParamQueue >> ParamQueue; // 3
+  // std::cout << ParamQueue.check_state();
 
-  // std::cout << queue << std::endl;
-  // queue(a)(a)(a); // 0
+  // std::cout << ParamQueue << std::endl;
+  // ParamQueue(a)(a)(a); // 0
   // std::cout << a << std::endl;
 
-  // std::cin >> queue >> queue; // 2
-  // queue(a); // 1
+  // std::cin >> ParamQueue >> ParamQueue; // 2
+  // ParamQueue(a); // 1
 
-  // std::cin >> queue >> queue >> queue; // 4
-  // queue(a)(a)(a)(a); // 0
+  // std::cin >> ParamQueue >> ParamQueue >> ParamQueue; // 4
+  // ParamQueue(a)(a)(a)(a); // 0
 }
