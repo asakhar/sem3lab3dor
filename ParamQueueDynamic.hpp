@@ -128,6 +128,10 @@ public:
   // }
 };
 
+int main() {
+    QueueElem a, b(1,"123");
+    QueueElem c = QueueElem(std::move(b));
+}
 /**
  * @enum
  * @brief Queue filling state enum
@@ -203,7 +207,7 @@ public:
    *
    * @param mul
    */
-  inline void resize(size_t mul) { *this = std::move(ParamQueue(*this, mul)); }
+  inline void resize(size_t mul) { *this = ParamQueue(*this, mul); }
   /**
    * @brief Copy-assignment operator
    *
@@ -304,7 +308,7 @@ public:
       if ((back >= _vector_size) == (front >= _vector_size))
         return QueueState::empt;
       else
-        return QueueState::full;
+        return QueueState::full; // array is full
     }
     else
       return QueueState::part;
@@ -327,6 +331,7 @@ public:
     return back - front;
   }
 };
+
 /**
  * @brief Queue state stream print operator
  *

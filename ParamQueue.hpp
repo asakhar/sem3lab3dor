@@ -97,6 +97,7 @@ public:
    */
   ParamQueue(std::vector<QueueElem> _q = {}) : front(0), back(0)
   {
+    ParamQueue a;
     for (size_t i = 0; i < _q.size(); i++)
       operator+=(_q[i]);
   }
@@ -140,7 +141,7 @@ public:
   {
     if ((back >= __n) == (front >= __n) && back % __n == front % __n)
       throw std::runtime_error("Queue is empty");
-    elem = *(queue + (front++) % __n);
+    elem = queue[(front++) % __n];
     front %= 2 * __n;
     return *this;
   }
@@ -154,7 +155,7 @@ public:
   {
     if ((back >= __n) != (front >= __n) && back % __n == front % __n)
       throw std::runtime_error("Queue overflow");
-    *(queue + (back++) % __n) = elem;
+    queue[(back++) % __n] = elem;
     back %= 2 * __n;
     return queue[(back + __n - 1) % __n];
   }
